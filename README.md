@@ -1,6 +1,8 @@
-# rehiring
+# re-hiring
 
 My Javascript/mxWeb&trade; ["AskHN: Who Is Hiring"](https://github.com/kennytilton/whoshiring) browser ported to CLJS/[re-frame](https://github.com/Day8/re-frame). Search and annotate the hundreds of jobs listed every month.
+
+[ProTip&trade;: Looking for the progress bar stuff? Scroll all the way down.]
 
 If yer just lookin' for work, the JS version is [live here](https://kennytilton.github.io/whoishiring/) grace a GitHub. Or you can clone this and run it yourself. See below for a devops necessity.
 
@@ -66,10 +68,13 @@ lein clean
 lein cljsbuild once min
 ```
 ## Sidebar: a progress bar animation in re-frame
-Parsing eight hundred plus jobs from scratch by loading AskHN HTML pages into an iframe can take a noticeable while, so I thought I should do a progress bar. Then I saw the app on my phone and *new* I had to do a progress bar. That turned out to be quite tricky, in part because declarative functional frameworks have a "steady-state" attitude which is wonderful 95% of the time but not so much for event-exposing functionality. You can see a primitive version from the JS implementation [live here](https://kennytilton.github.io/whoishiring/). The CLJS/re-frame second-generation prorgress bar is much nicer but for now you'll have to run it yourself to see it.
+Parsing eight hundred plus jobs from scratch by loading AskHN HTML pages into an iframe can take a noticeable while, so I thought I should do a progress bar. Then I saw the app on my phone and *knew* I *had* to do a progress bar. That turned out to be quite tricky, in part because declarative functional frameworks have a "steady-state" attitude which is wonderful 95% of the time but not so much for event-exposing functionality. You can see a primitive version of te progress bar from the JS implementation [live here](https://kennytilton.github.io/whoishiring/). The CLJS/re-frame second-generation prorgress bar is much nicer but for now you'll have to run it yourself to see it.
 
-The big enhancement is that you get to see two distinct processes run from start to completion. The first processed N pages to cull DOM nodes, the second processes all the DOM nodes looking for jobs.
+The big enhancement is that you get to see two distinct processes run from start to completion. The first processed N pages to cull DOM nodes, the second processes all the DOM nodes looking for jobs. The neat thing is that the scale changes from 1-6 pages to 0-800+ jobs, and one progress bar smoothly handles both.
 
-Just coding that -- and crucially doing it the work in chunks so progress could be reflected in a, well, `progress` element -- was entertaining, but then I could not get the animation to work. Even when I cheated and updated the progress element `max` and `value` properties directly, nothing until the end when we suddenly saw 100% completion. re-frame was not giving control back to the browser until the entire event domino chain had fallen. 
+Just coding that -- and crucially doing the work in chunks so progress could be reflected in a, well, `progress` element -- was entertaining, but then I could not get the animation to work. Even when I cheated and updated the progress element `max` and `value` properties directly, nothing until the end when we suddenly saw 100% completion. re-frame was not giving control back to the browser until the entire event domino chain had fallen. 
 
 The solution? Two! Throw meta `^:flush_dom` on each event, or use `:dispatch-later` instead of `:dispatch`. Check out the heavily commented source files `month_loader_views.cljs` and `month_loader.cljs` for the deets. 
+
+### Before you ask
+Yeah, since the app works off static page grabs that fall out of date anyway, there would be no harm in parsing the pages *once* and saving it all in a big JSON file. I just got bored before then. And now HN has an API on the way that will Change Everything&trade; so we will wait for that. This is just about a progress bar if one is needed.
